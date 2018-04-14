@@ -149,7 +149,6 @@ void porownai_usun(char * pathsrc, char * pathdest)
 int copy(char * arSrcPath, char * arDestPath,off_t maxsize){
 
     struct    dirent* spnDirPtr;    /* struct dirent to store all files*/
-    //struct    dirent* spnDirPtr2;
     struct stat st_buf;
     struct stat test;
     DIR* pnOpenDir = NULL;    /*DIR Pointer to open Dir*/
