@@ -118,7 +118,7 @@ int main (int argc, char **argv)
         logger("<info> Wywolanie synchronizacji po wykryciu obudzenia");
         //
         //funkcja synchronizacji
-        //
+        //git
         copy(argv[1], argv[2], wvalue);
         wakeupFlag = 0;
         wakeupIterator = tvalue;
