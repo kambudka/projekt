@@ -25,43 +25,39 @@ int kopiuj(char * zrodlo, char * cel)
 {
     ssize_t nrd;
     int fd;
-    int fd1;
+    int Dpliku1;
     char buffer [BUFFOR];
     fd = open(zrodlo, O_RDONLY);
-    fd1 = open(cel, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
-    printf("Read/Write\n");
-    while (nrd = read(fd,buffer,sizeof(buffer))) {
-        write(fd1,buffer,nrd);
+    Dpliku1 = open(cel, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+    while (nrd = read(fd,buffer,sizeof(buffer))){
+        write(Dpliku1,buffer,nrd);
     }
     close(fd);
-    close(fd1);
+    close(Dpliku1);
 }
 
 void kopiujmmap(char *zrodlo, char *cel)
 {
     int sfd, dfd;
-    char *src, *dest;
-    size_t filesize;
+    char *source, *dest;
+    size_t rozmiar;
     /* SOURCE */
     sfd = open(zrodlo, O_RDONLY);
-    filesize = lseek(sfd, 0, SEEK_END);
+    rozmiar = lseek(sfd, 0, SEEK_END);
 
-    src = mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, sfd, 0);
-
+    source = mmap(NULL, rozmiar, PROT_READ, MAP_PRIVATE, sfd, 0);
     /* DESTINATION */
     dfd = open(cel, O_WRONLY| O_CREAT, 0666);
 
-    ftruncate(dfd, filesize);
+    ftruncate(dfd, rozmiar);
 
-    //dest = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dfd, 0);
-    printf("MMAP\n");
     /* COPY */
-    write(dfd, src, filesize);
-    if (dfd != filesize) {
+    write(dfd, source, rozmiar);
+    if (dfd != rozmiar) {
         if (dfd == -1)
-            printf("write");
+            printf("Error");
     }
-    munmap(src, filesize);
+    munmap(source, rozmiar);
 
     close(sfd);
     close(dfd);
@@ -69,33 +65,33 @@ void kopiujmmap(char *zrodlo, char *cel)
 
 int modyfikacja(char * zrodlo, char * cel)
 {
-    struct stat Szrodla;
-    struct stat Scelu;
-    stat(zrodlo, &Szrodla);
-    stat(cel, &Scelu);
+    struct stat STATzrodla;
+    struct stat STATcelu;
+    stat(zrodlo, &STATzrodla);
+    stat(cel, &STATcelu);
     time_t t1,t2;
-    t1 = Szrodla.st_mtime;
-    t2 = Scelu.st_mtime;
+
+    t1 = STATzrodla.st_mtime;
+    t2 = STATcelu.st_mtime;
+
     double diff = difftime(t2,t1);
-    //printf("%f\n" ,diff);
+
     if(t1 > t2)
         return 0;
-    //printf(" Zrodlo jest starsze\n");
     else if(t1<=t2)
         return 1;
-    //printf("Cel jest zaktualizowany\n");
 }
 
-void usun_folder(char *path)
+void usun_folder(char *sciezka)
 {
     DIR*            dp;
     struct dirent*  ep;
     char            p_buf[512] = {0};
 
-    dp = opendir(path);
+    dp = opendir(sciezka);
 
     while ((ep = readdir(dp)) != NULL) {
-        sprintf(p_buf, "%s/%s", path, ep->d_name);
+        sprintf(p_buf, "%s/%s", sciezka, ep->d_name);
         if (strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0) 
         continue;
         else if (ep->d_type == DT_DIR)
@@ -104,35 +100,29 @@ void usun_folder(char *path)
             unlink(p_buf);
     }
     closedir(dp);
-    rmdir(path);
+    rmdir(sciezka);
 }
 
-void porownai_usun(char * pathsrc, char * pathdest)
+void porownai_usun(char * zrodlo, char * cel)
 {
-  struct dirent **eps;
-  struct dirent **eps2;
-  int n;
-  int n2;
-    int cnt,cnt2;
+    struct dirent **eps;
+    struct dirent **eps2;
+    int n,n2;   //Liczba plikow
+    int cnt,cnt2;   //Iteratory petli
     char doUsuniecia[MAXNAME] = {0};
-  n = scandir (pathsrc, &eps, one, alphasort);
-  n2 = scandir (pathdest, &eps2, one, alphasort);
-  if (n2 >= 0)
-    {
-     for(cnt2=0; cnt2<n2; cnt2++)
-        {
+    n = scandir (zrodlo, &eps, one, alphasort);
+    n2 = scandir (cel, &eps2, one, alphasort);
+    if (n2 >= 0){
+        for(cnt2=0; cnt2<n2; cnt2++){
             int flag = 0;
-            for(cnt=0; cnt<n; cnt++)
-            {
-                if(strcmp(eps[cnt]->d_name, eps2[cnt2]->d_name)==0)
-                {
-                flag = 1;
-                break;
+            for(cnt=0; cnt<n; cnt++){
+                if(strcmp(eps[cnt]->d_name, eps2[cnt2]->d_name)==0){
+                    flag = 1;
+                    break;
                 }
             }
-            if(flag==0)
-            {
-            sprintf(doUsuniecia, "%s/%s", pathdest, eps2[cnt2]->d_name);
+            if(flag==0){
+                sprintf(doUsuniecia, "%s/%s", cel, eps2[cnt2]->d_name);
             if ((eps2[cnt2]->d_type == DT_REG))
                 unlink(doUsuniecia);
             else if ((eps2[cnt2]->d_type == DT_DIR))
@@ -146,10 +136,10 @@ void porownai_usun(char * pathsrc, char * pathdest)
     //return eps;
 }
 
-int copy(char * arSrcPath, char * arDestPath,off_t maxsize){
+int copy(char * zrodlo, char * cel,off_t maxsize){
 
     struct    dirent* spnDirPtr;    /* struct dirent to store all files*/
-    struct stat st_buf;
+    struct stat st_buffor;
     struct stat test;
     DIR* pnOpenDir = NULL;    /*DIR Pointer to open Dir*/
     DIR* pnReadDir = NULL;    /*DIR POinter to read directory*/
@@ -157,9 +147,9 @@ int copy(char * arSrcPath, char * arDestPath,off_t maxsize){
     int writefd;
     char strDestFileName[MAXNAME] = {0};
     char strFromFileName[MAXNAME] = {0};
-    pnOpenDir = opendir(arSrcPath); 
+    pnOpenDir = opendir(zrodlo); 
 
-    porownai_usun(arSrcPath,arDestPath);
+    porownai_usun(zrodlo,cel);
     if(!pnOpenDir)
     printf("\n ERROR! Directory can not be open");
     else
@@ -169,25 +159,20 @@ int copy(char * arSrcPath, char * arDestPath,off_t maxsize){
     {
         if(nErrNo == 0) nErrNo = errno;
    
-        stat(spnDirPtr->d_name, &st_buf);
-        sprintf(strDestFileName, "%s/%s", arDestPath, spnDirPtr->d_name);
-        sprintf(strFromFileName, "%s/%s", arSrcPath, spnDirPtr->d_name);
+        stat(spnDirPtr->d_name, &st_buffor);
+        sprintf(strDestFileName, "%s/%s", cel, spnDirPtr->d_name);
+        sprintf(strFromFileName, "%s/%s", zrodlo, spnDirPtr->d_name);
 
         if (spnDirPtr->d_type == DT_DIR && strcmp(spnDirPtr->d_name, ".") != 0 && strcmp(spnDirPtr->d_name, "..") != 0)
         {
-            sprintf(strFromFileName, "%s/%s", arSrcPath, spnDirPtr->d_name);
-            sprintf(strDestFileName, "%s/%s", arDestPath, spnDirPtr->d_name);
             mkdir(strDestFileName, 0777);
             copy(strFromFileName,strDestFileName,MAXSIZE);
         }
         else if ((spnDirPtr->d_type == DT_REG))
         { 
             modyfikacja(strFromFileName,strDestFileName);
-           // int readfd = open(strFromFileName, O_RDONLY);
-            //kopiuj(strFromFileName, strDestFileName);
             if(modyfikacja(strFromFileName,strDestFileName)==0){
                   stat(strFromFileName, &test);
-                    printf("File size: %d bytes\n", test.st_size);
                     if(test.st_size > MAXSIZE)
                         kopiujmmap(strFromFileName, strDestFileName);
                     else

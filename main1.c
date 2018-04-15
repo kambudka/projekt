@@ -109,7 +109,7 @@ int main (int argc, char **argv)
 
       //Petka uspienia, break gdy uplynie czas albo bedzie podniesiona flaga
       while(wakeupIterator != 0 && wakeupFlag != 1){
-        sleep(30);
+        sleep(2);
         wakeupIterator--;
       }
 
