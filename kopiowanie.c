@@ -27,6 +27,7 @@ int kopiuj(char * zrodlo, char * cel)
     int fd;
     int Dpliku1;
     char buffer [BUFFOR];
+    printf("READ/Write\n");
     fd = open(zrodlo, O_RDONLY);
     Dpliku1 = open(cel, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
     while (nrd = read(fd,buffer,sizeof(buffer))){
@@ -50,7 +51,7 @@ void kopiujmmap(char *zrodlo, char *cel)
     dfd = open(cel, O_WRONLY| O_CREAT, 0666);
 
     ftruncate(dfd, rozmiar);
-
+    printf("MMAP\n");
     /* COPY */
     write(dfd, source, rozmiar);
     if (dfd != rozmiar) {
@@ -136,7 +137,7 @@ void porownai_usun(char * zrodlo, char * cel)
     //return eps;
 }
 
-int copy(char * zrodlo, char * cel,off_t maxsize){
+int copy(char * zrodlo, char * cel, off_t maxsize, int rflag){
 
     struct    dirent* spnDirPtr;    /* struct dirent to store all files*/
     struct stat st_buffor;
@@ -163,10 +164,10 @@ int copy(char * zrodlo, char * cel,off_t maxsize){
         sprintf(strDestFileName, "%s/%s", cel, spnDirPtr->d_name);
         sprintf(strFromFileName, "%s/%s", zrodlo, spnDirPtr->d_name);
 
-        if (spnDirPtr->d_type == DT_DIR && strcmp(spnDirPtr->d_name, ".") != 0 && strcmp(spnDirPtr->d_name, "..") != 0)
+        if (spnDirPtr->d_type == DT_DIR && strcmp(spnDirPtr->d_name, ".") != 0 && strcmp(spnDirPtr->d_name, "..") != 0 && rflag==1)
         {
             mkdir(strDestFileName, 0777);
-            copy(strFromFileName,strDestFileName,MAXSIZE);
+            copy(strFromFileName,strDestFileName,MAXSIZE,rflag);
         }
         else if ((spnDirPtr->d_type == DT_REG))
         { 

@@ -13,6 +13,6 @@ void usun_folder(char *path);
 
 void porownai_usun(char * pathsrc, char * pathdest);
 
-int copy(char * arSrcPath, char * arDestPath,off_t maxsize);
+int copy(char * arSrcPath, char * arDestPath,off_t maxsize, int rflag);
 
 #endif

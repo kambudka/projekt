@@ -102,7 +102,7 @@ int main (int argc, char **argv)
         //
         //funkcja synchronizacji
         //
-        copy(argv[1], argv[2], wvalue);
+        copy(svalue, dvalue, wvalue, Rflag);
         wakeupIterator = 15;
         logger("<info> Czasowe uspienie demona");
       }
@@ -119,7 +119,7 @@ int main (int argc, char **argv)
         //
         //funkcja synchronizacji
         //git
-        copy(argv[1], argv[2], wvalue);
+        copy(svalue, dvalue, wvalue, Rflag);
         wakeupFlag = 0;
         wakeupIterator = tvalue;
         logger("<info> Czasowe uspienie demona");
@@ -195,7 +195,7 @@ void get_path(char* tablica, char* path)
   int dlugosc = my_size_of(path);
 
   if(path[0] == '/'){
-    //strcat(tablica, path);
+    strcat(tablica, path);
   }else{
     strcat(tablica, current_dir);
     strcat(tablica, "/");
