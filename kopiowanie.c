@@ -184,14 +184,14 @@ int copy(char * zrodlo, char * cel, off_t maxsize, int rflag){
         if (spnDirPtr->d_type == DT_DIR && strcmp(spnDirPtr->d_name, ".") != 0 && strcmp(spnDirPtr->d_name, "..") != 0 && rflag==1)
         {
             mkdir(strDestFileName, 0777);
-            copy(strFromFileName,strDestFileName,MAXSIZE,rflag);
+            copy(strFromFileName,strDestFileName,maxsize,rflag);
         }
         else if ((spnDirPtr->d_type == DT_REG))
         { 
             modyfikacja(strFromFileName,strDestFileName);
             if(modyfikacja(strFromFileName,strDestFileName)==0){
                   stat(strFromFileName, &test);
-                    if(test.st_size > MAXSIZE)
+                    if(test.st_size > maxsize)
                         kopiujmmap(strFromFileName, strDestFileName);
                     else
                         kopiuj(strFromFileName, strDestFileName);
