@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <string.h>
+#include <syslog.h>
 #include "modyfikacje.h"
  
 #define MAXSIZE ( 41943040 )
@@ -27,7 +28,7 @@ int kopiuj(char * zrodlo, char * cel)
     int fd;
     int Dpliku1;
     char buffer [BUFFOR];
-    printf("READ/Write\n");
+    //logg("<info> Kopiowanie Read/WritePliku %s",zrodlo);
     fd = open(zrodlo, O_RDONLY);
     Dpliku1 = open(cel, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
     while (nrd = read(fd,buffer,sizeof(buffer))){
@@ -37,21 +38,27 @@ int kopiuj(char * zrodlo, char * cel)
     close(Dpliku1);
 }
 
+void logg(char* text){
+	openlog("synchd", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	syslog(LOG_INFO, text);
+	closelog();
+}
+
 void kopiujmmap(char *zrodlo, char *cel)
 {
     int sfd, dfd;
     char *source, *dest;
+
     size_t rozmiar;
     /* SOURCE */
     sfd = open(zrodlo, O_RDONLY);
     rozmiar = lseek(sfd, 0, SEEK_END);
-
+    logg("<info> Kopiowanie MMAP Pliku ");
     source = mmap(NULL, rozmiar, PROT_READ, MAP_PRIVATE, sfd, 0);
     /* DESTINATION */
     dfd = open(cel, O_WRONLY| O_CREAT, 0666);
 
     ftruncate(dfd, rozmiar);
-    printf("MMAP\n");
     /* COPY */
     write(dfd, source, rozmiar);
     if (dfd != rozmiar) {
@@ -95,10 +102,16 @@ void usun_folder(char *sciezka)
         sprintf(p_buf, "%s/%s", sciezka, ep->d_name);
         if (strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0) 
         continue;
-        else if (ep->d_type == DT_DIR)
+        else if (ep->d_type == DT_DIR){
+            //sprintf(logtxt, "%s/%s", "<info> Usuwanie Folderu ", ep->d_name);
+            //logg(logtxt);
             usun_folder(p_buf);
-        else
+        }
+        else{
+            //sprintf(logtxt, "%s/%s", "<info> Usuwanie Pliku ", ep->d_name);
+           // logg(logtxt);
             unlink(p_buf);
+        }
     }
     closedir(dp);
     rmdir(sciezka);
@@ -111,6 +124,7 @@ void porownai_usun(char * zrodlo, char * cel)
     int n,n2;   //Liczba plikow
     int cnt,cnt2;   //Iteratory petli
     char doUsuniecia[MAXNAME] = {0};
+    char logtxt[MAXNAME] = {0};
     n = scandir (zrodlo, &eps, one, alphasort);
     n2 = scandir (cel, &eps2, one, alphasort);
     if (n2 >= 0){
@@ -124,8 +138,11 @@ void porownai_usun(char * zrodlo, char * cel)
             }
             if(flag==0){
                 sprintf(doUsuniecia, "%s/%s", cel, eps2[cnt2]->d_name);
-            if ((eps2[cnt2]->d_type == DT_REG))
+            if ((eps2[cnt2]->d_type == DT_REG)){
+                sprintf(logtxt, "%s/%s", "<info> Usuwanie Pliku ", eps2[cnt2]->d_name);
+                logg(logtxt);
                 unlink(doUsuniecia);
+            }
             else if ((eps2[cnt2]->d_type == DT_DIR))
                 usun_folder(doUsuniecia); 
                      
@@ -133,8 +150,7 @@ void porownai_usun(char * zrodlo, char * cel)
         }
     }
   else
-    perror ("Couldn't open the directory");
-    //return eps;
+    logg("<error> Nie mozna otworzyc folderu ");
 }
 
 int copy(char * zrodlo, char * cel, off_t maxsize, int rflag){
@@ -152,13 +168,14 @@ int copy(char * zrodlo, char * cel, off_t maxsize, int rflag){
 
     porownai_usun(zrodlo,cel);
     if(!pnOpenDir)
-    printf("\n ERROR! Directory can not be open");
+    logg("<error> Nie mozna otworzyc folderu ");
     else
     {    
     int nErrNo = 0;
     while(spnDirPtr = readdir(pnOpenDir))
     {
-        if(nErrNo == 0) nErrNo = errno;
+        if(nErrNo == 0 ) 
+            nErrNo = errno;
    
         stat(spnDirPtr->d_name, &st_buffor);
         sprintf(strDestFileName, "%s/%s", cel, spnDirPtr->d_name);
@@ -180,15 +197,16 @@ int copy(char * zrodlo, char * cel, off_t maxsize, int rflag){
                         kopiuj(strFromFileName, strDestFileName);
             }
             else{
-                printf("Pliki są aktualne\n");
+                //printf("Pliki są aktualne\n");
             }
 
     }
     }
-    if(nErrNo != errno)
-        printf ("\nERROR Occurred!\n");
+    if(nErrNo != errno){
+        //logg("<error> Wystapil blad");
+    }
     else
-        printf ("\nProcess Completed\n");
+        logg("<info> Synchronizacja zakonczona ");
 
     }
     closedir(pnOpenDir);

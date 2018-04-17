@@ -13,6 +13,8 @@ void usun_folder(char *path);
 
 void porownai_usun(char * pathsrc, char * pathdest);
 
+void logg(char* text);
+
 int copy(char * arSrcPath, char * arDestPath,off_t maxsize, int rflag);
 
 #endif

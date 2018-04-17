@@ -62,8 +62,6 @@ int main (int argc, char **argv)
        ;
       }
   }
-
-
   //Przypisanie parametrow uruchomienia gdy sa tylko dwa
   if(argc == 3 && svalue == NULL && dvalue == NULL){
     strcpy(svalue , argv[1]);
@@ -109,7 +107,7 @@ int main (int argc, char **argv)
 
       //Petka uspienia, break gdy uplynie czas albo bedzie podniesiona flaga
       while(wakeupIterator != 0 && wakeupFlag != 1){
-        sleep(2);
+        sleep(1);
         wakeupIterator--;
       }
 
