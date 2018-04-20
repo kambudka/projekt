@@ -1,0 +1,48 @@
+Dokumentacja Projektu 
+Demon synchronizujący dwa potkatalogi.
+
+Autorzy:
+Mateusz Bednarski 
+Kamil Budka
+
+Spis plików:
+Makefile
+main.c
+kopiowanie.c
+modyfikacje.h
+
+Uruchomienie:
+Znajdując się w katalogu z projektem należy uruchomic makefile komendą:
+-
+make main
+-
+Aby uruchomić demona należy wpisać:
+-
+./main -s /sciezka_zrodlowa -d /sciezka_docelowa
+-
+Jest to minimalna komenda.
+Dodatkowe opcje podaje się za pomocą parametrów:
+
+-R = 	Rekurencyjne synchronizowanie katalogów.
+-w 10B = 	Wielkosc pliku od której będą one mapowane do pamięci. 
+		Możeliwe parametry: XB, XK, XM, XG Oznaczajęce wielkości.
+-t 360 =	Czas uspienia demona w sekundach (docelowo 5 min).
+
+Działanie demona:
+
+***Co się dzieje w mainie***
+
+Jest uruchamiana funkcja synchronizująca która przyjmuje parametry (zrodlo,cel,maxsize,rflag).
+Najpierw są usuwane wszystkie pliki z katalogu docelowego nie znajdujące się w katalogu zrodlowym.
+Uruchamiana jest funkcja porownaj_usun która usuwa pliki i wywołuje funkcje usun_folder dla folderów.
+W pętli pojedynczo są odczytywane pliki w katalogu i sprawdzane są ich typy.
+Jeśli to folder i -R jest ustwione na 1 to dla tego katalogu odpalana jest rekurencyjnie Synchronizacja.
+Jeśli to regularny plik, odpalana jest funkcja modyfikacja() która porównoje date modyfikacji.
+Gdy plik zrodlowy jest nowszy, jest kopiowany do folderu docelowego.
+Przed skopiowanie jest porównywana wielkość pliku z parametrem maxsize.
+Pliki są MMAPowane do pamięci jeśli są większe bądzie normalnie odczytywane i zapisywanie poprzez buffor jeśli są mniejsze.
+Każde kopiowanie i usuwanie jest logowane do syslogu za pomocą funkcji logg(info, sciezka) która skleja podaną informacje i sciezke w jeden string.
+Po kopiowaniu/usuwaniu bądz tylko sprawdzeniu czy pliki są aktualne Synchronizacja kończy się. Powracając w stan uśpienia.
+
+
+
