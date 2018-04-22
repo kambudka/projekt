@@ -10,9 +10,9 @@ void kopiujmmap(char *zrodlo, char *cel);   /* Funkcja mapująca plik do pamięc
 
 int modyfikacja(char * zrodlo, char * cel);    /* Funkcja sprawdzajaca daty modyfikacji */
 
-void usun_folder(char *path);   /* Funkcja usuwające folder i jego zawartosc */
+void usun_folder(char *sciezka);   /* Funkcja usuwające folder i jego zawartosc */
 
-void porownai_usun(char * pathsrc, char * pathdest);
+void porownai_usun(char * zrodlo, char * cel);
 
 void logg(char* text, char* sciezka);
 

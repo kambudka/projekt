@@ -111,32 +111,31 @@ void usun_folder(char *sciezka) /* Funkcja usuwające folder i jego zawartosc */
     rmdir(sciezka); /* Na koniec usuwanie katalogu */
 }
 
-void porownai_usun(char * zrodlo, char * cel)   /* Funkcja porownojaca pliku w katalogach */
+void porownai_usun(char * zrodlo, char * cel)
 {
     struct dirent **eps; /* Struktura dirent do przechowywania pliku */
     struct dirent **eps2;   /* Struktura dirent do przechowywania pliku */
     int n,n2;   //Liczba plikow
-    int ite1,ite2;   //Iteratory petli
+    int cnt,cnt2;   //Iteratory petli
     char doUsuniecia[MAXNAME] = {0};    /* Sciezka pliku do usuniecia */ 
     n = scandir (zrodlo, &eps, one, alphasort); /* Przeskanowanie folderu zrodlowego */
     n2 = scandir (cel, &eps2, one, alphasort);  /* Przeskanowanie folderu docelowego */
     if (n2 >= 0){
-        for(ite2=0; ite2<n2; ite2++){
+        for(cnt2=0; cnt2<n2; cnt2++){
             int flag = 0;
-            for(ite1=0; ite1<n; ite1++){    /* Porownywanie plikow */
-                if(strcmp(eps[ite1]->d_name, eps2[ite2]->d_name)==0){
+            for(cnt=0; cnt<n; cnt++){   /* Porownywanie plikow */
+                if(strcmp(eps[cnt]->d_name, eps2[cnt2]->d_name)==0){
                     flag = 1;
                     break;
                 }
             }
             if(flag==0){    /* Jesli nie znaleziono 2 takich samych plikow */
-                sprintf(doUsuniecia, "%s/%s", cel, eps2[ite2]->d_name); /* Tworzenie sciezki do usuniecia */
-            if ((eps2[ite2]->d_type == DT_REG)){    /* Jesli to zwykly plik -> unlink */
-                logg("<info> Usuwanie Pliku ",eps2[ite2]->d_name);
+                sprintf(doUsuniecia, "%s/%s", cel, eps2[cnt2]->d_name); /* Tworzenie sciezki do usuniecia */
+            if ((eps2[cnt2]->d_type == DT_REG)){    /* Jesli to zwykly plik -> unlink */
+                logg("<info> Usuwanie Pliku ",eps2[cnt2]->d_name);
                 unlink(doUsuniecia);
             }
-            else if ((eps2[ite2]->d_type == DT_DIR))    /* Jesli to folder -> rekurencyjne usuwanie */
-                logg("<info> Usuwanie Folderu ",eps2[ite2]->d_name);
+            else if ((eps2[cnt2]->d_type == DT_DIR))    /* Jesli to folder -> rekurencyjne usuwanie */
                 usun_folder(doUsuniecia);         
             }
         }
