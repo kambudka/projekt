@@ -1,10 +1,10 @@
 CC=gcc
 CFLAGS=-I.
 DEPS = modyfikacje.h
-OBJ = main.o kopiowanie.o 
+OBJ = synchd.o kopiowanie.o 
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-main: $(OBJ)
+synchd: $(OBJ)
 	gcc -o $@ $^ $(CFLAGS)

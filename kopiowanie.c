@@ -57,7 +57,7 @@ void kopiujmmap(char *zrodlo, char *cel)    /* Funkcja mapująca plik do pamięc
     dfd = open(cel, O_WRONLY| O_CREAT, 0666);   /* Otworzenie/Utworzenie  pliku docelowego */
     ftruncate(dfd, rozmiar);    /* Rozszerzenie pliku docelowego do wielkosci pliku zrodlowego */
 
-    logg("<info> Kopiowanie MMAP Pliku ","");
+    logg("<info> Kopiowanie MMAP Pliku ",zrodlo);
     write(dfd, source, rozmiar);    /* Kopiowanie mapy */
     if (dfd != rozmiar) {
         if (dfd == -1)
