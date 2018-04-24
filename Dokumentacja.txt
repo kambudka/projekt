@@ -1,5 +1,5 @@
 Dokumentacja Projektu 
-Demon synchronizujący dwa potkatalogi.
+Demon synchronizujący dwa podkatalogi.
 
 Autorzy:
 Mateusz Bednarski 
