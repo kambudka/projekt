@@ -29,9 +29,10 @@ Dodatkowe opcje podaje się za pomocą parametrów:
 -t 360 =	Czas uspienia demona w sekundach (docelowo 5 min).
 
 Działanie demona:
-
-***Co się dzieje w mainie***
-
+Pierwszym krokiem jest parsowanie parametrów.
+Nastepnie sprawdza czy sciezka była pośrednia, jeżeli tak przekształca ją na bezpośrednią.
+Potem sprawdza czy scieżki są folderami jeżeli nie to zwraca błąd na stderr.
+Tworzy demona, w którym:
 Jest uruchamiana funkcja synchronizująca która przyjmuje parametry (zrodlo,cel,maxsize,rflag).
 Najpierw są usuwane wszystkie pliki z katalogu docelowego nie znajdujące się w katalogu zrodlowym.
 Uruchamiana jest funkcja porownaj_usun która usuwa pliki i wywołuje funkcje usun_folder dla folderów.
@@ -42,7 +43,7 @@ Gdy plik zrodlowy jest nowszy, jest kopiowany do folderu docelowego.
 Przed skopiowanie jest porównywana wielkość pliku z parametrem maxsize.
 Pliki są MMAPowane do pamięci jeśli są większe bądzie normalnie odczytywane i zapisywanie poprzez buffor jeśli są mniejsze.
 Każde kopiowanie i usuwanie jest logowane do syslogu za pomocą funkcji logg(info, sciezka) która skleja podaną informacje i sciezke w jeden string.
-Po kopiowaniu/usuwaniu bądz tylko sprawdzeniu czy pliki są aktualne Synchronizacja kończy się. Powracając w stan uśpienia.
-
-
+Po kopiowaniu/usuwaniu bądz tylko sprawdzeniu czy pliki są aktualne Synchronizacja kończy się.
+Demon przechodzi w stan uśpienia.
+Po otrzymaniu sygnału SIGUSR1 albo skończeniu się ustawionego czasu ponownie synchronizuje pliki.
 
